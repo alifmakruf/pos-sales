@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ArrowLeft, Barcode, ImageUp, Pencil, Plus, ScanBarcode, Search, Store, Warehouse, X, Zap } from 'lucide-react'
 import { Badge, Btn, Card, Chip, Empty, Header, ProductImage, Screen, SearchField, Stepper, Summary } from '../ui.jsx'
 import { useStore } from '../store.jsx'
@@ -60,12 +61,12 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
               if (!active) return
               scanner
                 .stop()
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => {
                   onScan(decodedText)
                 })
             },
-            () => {} // Abaikan per-frame decode error saat barcode belum di depan kamera
+            () => { } // Abaikan per-frame decode error saat barcode belum di depan kamera
           )
           .then(() => {
             if (!active) return
@@ -95,7 +96,7 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
       setTorchOn(false)
       setTorchSupported(false)
       if (scannerRef.current?.isScanning) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
+        scannerRef.current.stop().catch(() => { }).finally(() => {
           scannerRef.current?.clear()
         })
       } else {
@@ -113,7 +114,7 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
     const next = !torchOn
     track.applyConstraints({ advanced: [{ torch: next }] })
       .then(() => setTorchOn(next))
-      .catch(() => {}) // Abaikan jika perangkat tidak mendukung
+      .catch(() => { }) // Abaikan jika perangkat tidak mendukung
   }
 
   // Pindai dari file gambar
@@ -144,7 +145,7 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
     onScan(manualCode.trim())
   }
 
-  return (
+  return createPortal(
     <div className={cn('fixed inset-0 z-30 grid place-items-center p-4', CONFIG.ux?.modalBackdrop || 'bg-black/60 backdrop-blur-sm')} role="dialog" aria-modal="true" aria-label="Scan Barcode">
       <div className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl bg-card p-5 shadow-2xl animate-fade-in-up border border-line">
         <div className="flex items-center justify-between">
@@ -161,9 +162,8 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
               <button
                 aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'}
                 onClick={toggleTorch}
-                className={`rounded-lg p-2 transition-colors ${
-                  torchOn ? 'bg-accent/20 text-accent' : 'text-muted hover:bg-chip hover:text-fg'
-                }`}
+                className={`rounded-lg p-2 transition-colors ${torchOn ? 'bg-accent/20 text-accent' : 'text-muted hover:bg-chip hover:text-fg'
+                  }`}
               >
                 <Zap className="size-5" fill={torchOn ? 'currentColor' : 'none'} />
               </button>
@@ -265,7 +265,8 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
