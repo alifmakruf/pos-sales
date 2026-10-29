@@ -1,0 +1,7 @@
+1. halaman login: a. tambahkan backdrop bercahaya di belakang logo, dan juga hilangkan background color dan border radius card nya. buat logo nya seperti sedang terapung(naik turun tipis perlahan) dan backdropnya juga mengikuti.
+                  b. untuk card login, pada form inputnya ketika di klik maka akan muncul animasi partikel cahaya bintang kecil yang keluar(animasi nya di luar bordernya dan arah keluarnya adalah dari bawah ke atas dan ga terlalu tebal untuk efeknya), hilangkan double bordernya ketika di klik
+                  c. tambahkan efek spotlight(kondisinya sama seperti animasi bintang yang bersinar) yang menerangai area login card dan membuat yang lainnya menjadi redup
+
+1.5 animasi masuk di login page dan home page: tambahkan animasi fade in up pada saat masuk ke halaman login dan home page dan untuk home page tambahkan animasi count up untuk angka di home page(saat pertama kali masuk ke home page)
+
+2. home page : tambahkan animasi mengkilap pada card transaksi sukses dan tambahkan animasi fill up liquid pada card target mingguan jadi fill nya ini sesuai dengan progres nya(misal progres nya 50% maka fill nya mengisi setengah dari card)
