@@ -96,7 +96,7 @@ export function StoreProvider({ children }) {
       const now = new Date()
       const id = `ODR-${String(now.getFullYear()).slice(2)}${two(now.getMonth() + 1)}${two(now.getDate())}${two(orders.length + 1)}`
       const order = {
-        id, customer: cart.name.trim(), phone: cart.phone ? `62+ ${cart.phone}` : '-',
+        id, customer: cart.name.trim(), phone: cart.phone ? `+62 ${cart.phone}` : '-',
         status: 'sukses', units, total, at: now.toISOString(),
         items: lines.map((l) => ({ pid: l.pid, vid: l.vid, qty: l.qty, name: l.variant.name, price: l.variant.price })),
       }

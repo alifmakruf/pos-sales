@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { User } from 'lucide-react'
 import { Card, Chip, Empty, Header, Screen, SearchField } from '../ui.jsx'
 import { useStore } from '../store.jsx'
-import { phoneDigits, rpShort } from '../lib'
+import { cn, phoneDigits, rpShort } from '../lib'
+import { CONFIG } from '../config'
 
 const SORTS = {
   Tertinggi: (a, b) => b.total - a.total,
@@ -28,8 +29,8 @@ export default function Customers() {
       </div>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
         <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:max-w-3xl">
-          <SearchField label="Nama customer" value={name} onChange={(e) => setName(e.target.value)} placeholder="Aji" />
-          <SearchField label="No. Telepon/Wa" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Aji" inputMode="tel" />
+          <SearchField label="Nama customer" value={name} onChange={(e) => setName(e.target.value)} placeholder="Cari nama pelanggan..." />
+          <SearchField label="No. Telepon/Wa" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Cari no. HP (cth: 0812)..." inputMode="tel" />
         </div>
         <div className="flex gap-2 overflow-x-auto lg:ml-auto lg:pb-1" role="group" aria-label="Urutkan">
           {Object.keys(SORTS).map((s) => <Chip key={s} active={sort === s} onClick={() => setSort(s)} className="h-9 px-3 text-xs">{s}</Chip>)}
@@ -39,12 +40,12 @@ export default function Customers() {
       <ul className="flex flex-col gap-3">
         {list.map((c) => (
           <li key={c.id}>
-            <Card className="flex items-stretch overflow-hidden">
+            <Card className={cn('flex items-stretch overflow-hidden border border-transparent', CONFIG.ux?.cardHoverEffect)}>
               <div className="flex flex-1 items-center justify-between gap-3 p-4">
-                <div><p className="text-xl">{c.name}</p><p className="text-sm text-muted">{c.phone}</p></div>
-                <div className="text-right"><p className="text-xl font-bold">{rpShort(c.total)}</p><p className="text-[11px] text-muted">{c.units} unit</p></div>
+                <div><p className="text-xl font-medium">{c.name}</p><p className="text-sm text-muted">{c.phone}</p></div>
+                <div className="text-right"><p className="text-xl font-bold text-price">{rpShort(c.total)}</p><p className="text-[11px] text-muted">{c.units} unit</p></div>
               </div>
-              <div className="grid w-20 place-items-center bg-chip"><span className="rounded-lg bg-soft px-2.5 py-1 text-sm text-ink">{c.count}x</span></div>
+              <div className="grid w-20 place-items-center bg-chip/50 border-l border-line2/40"><span className="rounded-lg bg-soft/20 text-soft font-bold px-2.5 py-1 text-sm border border-soft/30">{c.count}x</span></div>
             </Card>
           </li>
         ))}

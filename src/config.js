@@ -84,11 +84,20 @@ export const CONFIG = {
     },
   },
 
-  // ----------------------------------------------------------------------------
-  // 3. UKURAN & BENTUK (SIZES & SPACING)
-  // ----------------------------------------------------------------------------
   sizes: {
-    screenMaxWidth: 'max-w-[744px] lg:max-w-[1133px]', // Lebar maksimum layar tampilan
+    // Lebar maksimum layar tampilan (Screen & Login).
+    // Nilai 'w-full' membuat layout memenuhi 100vw penuh di desktop persis seperti di iPad.
+    // Jika ingin dibatasi lebar tertentu di desktop, bisa diisi misal: 'max-w-[1440px]' atau 'max-w-[1133px]'.
+    screenMaxWidth: 'w-full',
+
+    // Lebar maksimal kartu login agar tetap proporsional & nyaman dilihat saat layar 100vw di desktop
+    // Pilihan: 'max-w-[460px]', 'max-w-md', 'max-w-lg', atau 'w-full'
+    loginCardMaxWidth: 'max-w-[460px]',
+
+    // Posisi perataan kartu login di kolom kanan desktop:
+    // Pilihan: 'lg:justify-center' (tengah kolom kanan) | 'lg:justify-start' (kiri) | 'lg:justify-end' (kanan)
+    loginCardAlign: 'lg:justify-center',
+
     cardRadius: 'rounded-2xl',                         // Kelengkungan sudut kartu (border-radius)
     cardBorder: '',                                    // Garis tepi kartu umum (kosong '' = tanpa border di semua halaman)
     homeCardBorder: '',                                // Garis tepi kartu khusus Home page (kosong '' = tanpa garis border)
@@ -99,6 +108,46 @@ export const CONFIG = {
     primaryBtnHeight: 'h-12',                         // Tinggi tombol utama
     largeBtnHeight: 'h-14',                           // Tinggi tombol besar (checkout/submit)
     fabSize: 'size-[78px]',                           // Ukuran tombol melayang (FAB)
+  },
+
+  // ----------------------------------------------------------------------------
+  // 4. PENGALAMAN PENGGUNA & INTERAKSI (UX & MICRO-INTERACTIONS)
+  // Pengaturan interaksi taktil, feedback sentuhan, dan transisi halaman
+  // ----------------------------------------------------------------------------
+  ux: {
+    // Animasi transisi masuk halaman ('animate-fade-in-up' atau '' untuk instan)
+    pageTransition: 'animate-fade-in-up',
+
+    // Feedback sentuhan tombol utama & sekunder saat diklik (scale-down taktil kasir)
+    buttonActiveScale: 'active:scale-[0.98]',
+
+    // Feedback sentuhan tombol stepper jumlah barang (+ / -)
+    stepperActiveScale: 'active:scale-90',
+
+    // Feedback sentuhan filter chip kategori / status
+    chipActiveScale: 'active:scale-95',
+
+    // Efek hover halus pada kartu daftar (produk, pelanggan, pesanan, catatan)
+    cardHoverEffect: 'hover:border-line2 hover:shadow-md transition-all duration-150',
+
+    // Gaya fokus input form kasir (fokus halus tanpa double-border)
+    inputFocusStyle: 'focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-150',
+
+    // Efek backdrop gelap & blur pada modal dialog (scanner barcode, editor catatan)
+    modalBackdrop: 'backdrop-blur-sm bg-black/60',
+
+    // Tampilan kontainer filter tanggal di Riwayat (elegan & kontras selaras)
+    historyDateFilterBg: 'bg-card border border-line2 text-fg',
+  },
+
+  // ----------------------------------------------------------------------------
+  // PENGATURAN HALAMAN STOK (STOCK SETTINGS)
+  // ----------------------------------------------------------------------------
+  stock: {
+    // Urutan tab filter stok yang ditampilkan (logis & profesional untuk presentasi):
+    // Pilihan default: ['Semua', 'Tersedia', 'Rendah', 'Habis']
+    // Pilihan alternatif: ['Semua', 'Tinggi', 'Rendah', 'Habis']
+    filterTabs: ['Semua', 'Tersedia', 'Rendah', 'Habis'],
   },
 
   // ----------------------------------------------------------------------------
@@ -223,9 +272,9 @@ export const CONFIG = {
       headerTitle: 'Pesanan Baru',
       customerSectionTitle: 'Data Customer',
       customerNameLabel: 'Nama customer',
-      customerNamePlaceholder: 'Panjar Granowo',
+      customerNamePlaceholder: 'Ahmad Fauzi',
       customerPhoneLabel: 'No. Telepon/WA',
-      customerPhonePlaceholder: '857-0633-6657',
+      customerPhonePlaceholder: '812-3456-7890',
       itemsSectionTitle: 'Daftar Barang',
       btnAddItem: 'Tambah Barang',
       emptyItems: 'Belum ada barang. Pilih dari katalog untuk memulai pesanan.',
@@ -299,6 +348,7 @@ export const CONFIG = {
     settings: {
       headerTitle: 'Settings',
       searchLabel: 'Telusuri settings',
+      searchPlaceholder: 'Cari pengaturan, tema...',
       defaultBtn: 'Default settings',
       resetToast: 'Pengaturan dikembalikan ke default.',
       sectionDisplay: 'Tampilan',

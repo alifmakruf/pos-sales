@@ -1,8 +1,9 @@
-import { User } from 'lucide-react'
+import { Check, User } from 'lucide-react'
 import { Badge, Btn, Card, Header, ProductImage, Screen } from '../ui.jsx'
 import { useStore } from '../store.jsx'
-import { rp } from '../lib'
+import { cn, rp } from '../lib'
 import { go } from '../router'
+import { CONFIG } from '../config'
 
 export default function Confirm() {
   const { cart, lines, total, units, confirmOrder, notify, orders } = useStore()
@@ -31,7 +32,7 @@ export default function Confirm() {
         <div className="flex flex-col gap-4">
           <Card className="flex items-center gap-4 p-4">
             <span className="grid size-16 place-items-center rounded-xl bg-chip"><User className="size-8" /></span>
-            <div><p className="text-xl">{cart.name}</p><p className="text-sm text-muted">{cart.phone ? `62+ ${cart.phone}` : 'Tanpa nomor telepon'}</p></div>
+            <div><p className="text-xl">{cart.name}</p><p className="text-sm text-muted">{cart.phone ? `+62 ${cart.phone}` : 'Tanpa nomor telepon'}</p></div>
           </Card>
           <section aria-labelledby="items">
             <div className="mb-2 flex items-center gap-3 px-1">
@@ -40,7 +41,7 @@ export default function Confirm() {
             </div>
             <ul className="flex flex-col gap-3">
               {lines.map((l) => (
-                <li key={l.pid + l.vid} className="flex items-center gap-3 rounded-2xl bg-card p-3">
+                <li key={l.pid + l.vid} className={cn('flex items-center gap-3 rounded-2xl bg-card p-3 border border-transparent', CONFIG.ux?.cardHoverEffect)}>
                   <ProductImage id={l.pid} alt={l.product.name} className="size-[72px] rounded-lg" />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">{l.product.name}</p>
@@ -61,7 +62,7 @@ export default function Confirm() {
           <div className={row}><span>Pajak (PPN 11%)</span><span>Rp0</span></div>
           <div className="mt-4 flex items-end justify-between gap-3">
             <div><p className="text-sm">Total Tagihan <span className="text-xs text-muted">{units} Unit</span></p><p className="text-3xl font-bold text-price">{rp(total)}</p></div>
-            <Btn className="h-14 w-40" onClick={submit}>Konfirmasi</Btn>
+            <Btn className="h-14 w-44 gap-2" onClick={submit}><Check className="size-5" />Konfirmasi</Btn>
           </div>
         </Card>
       </div>

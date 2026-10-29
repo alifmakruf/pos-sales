@@ -10,18 +10,22 @@ export const Card = ({ border = CONFIG.sizes.cardBorder, className, ...p }) => (
 )
 
 export const Screen = ({ children, className }) => (
-  <main className={cn('mx-auto flex min-h-dvh w-full flex-col gap-4 p-4 lg:p-5', CONFIG.sizes.screenMaxWidth, className)}>
+  <main className={cn('mx-auto flex min-h-dvh w-full flex-col gap-4 p-4 lg:p-5', CONFIG.sizes.screenMaxWidth, CONFIG.ux?.pageTransition || 'animate-fade-in-up', className)}>
     {children}
   </main>
 )
 
 export function Header({ title, back = '/home' }) {
   return (
-    <header className="flex h-16 items-center gap-3 rounded-2xl bg-card px-3 lg:h-[73px] lg:px-5">
-      <button aria-label="Kembali" onClick={() => go(back)} className="grid size-10 place-items-center rounded-lg hover:bg-chip">
+    <header className="flex h-16 items-center gap-3 rounded-2xl bg-card px-3 shadow-xs lg:h-[73px] lg:px-5">
+      <button
+        aria-label="Kembali"
+        onClick={() => go(back)}
+        className="grid size-10 place-items-center rounded-lg transition-transform active:scale-95 hover:bg-chip"
+      >
         <ArrowLeft className="size-6" />
       </button>
-      <h1 className="text-xl font-semibold tracking-wider">{title}</h1>
+      <h1 className="text-xl font-semibold tracking-wider text-head">{title}</h1>
     </header>
   )
 }
@@ -42,8 +46,11 @@ export const Badge = ({ tone = 'accent', className, children }) => (
 export const Chip = ({ active, className, ...p }) => (
   <button
     className={cn(
-      'h-10 shrink-0 rounded-full border px-5 text-sm transition-colors',
-      active ? 'border-accent bg-accent font-medium text-ink' : 'border-line2 bg-card text-muted hover:bg-chip',
+      'h-10 shrink-0 rounded-full border px-5 text-sm select-none transition-all',
+      CONFIG.ux?.chipActiveScale || 'active:scale-95',
+      active
+        ? 'border-accent bg-accent font-medium text-ink shadow-sm'
+        : 'border-line2 bg-card text-muted hover:bg-chip hover:text-fg',
       className,
     )}
     {...p}
@@ -56,11 +63,12 @@ export const Btn = ({ variant = 'primary', className, ...p }) => {
   return (
     <button
       className={cn(
-        'flex items-center justify-center gap-2 px-5 transition-colors',
+        'flex items-center justify-center gap-2 px-5 transition-all select-none',
         CONFIG.sizes.primaryBtnHeight,
         CONFIG.sizes.buttonRadius,
         btnConfig.fontWeight,
         btnConfig.letterSpacing,
+        CONFIG.ux?.buttonActiveScale || 'active:scale-[0.98]',
         isPrimary
           ? cn(btnConfig.bg, btnConfig.text, btnConfig.shadow, btnConfig.hover)
           : cn(btnConfig.bg, btnConfig.text, btnConfig.border, btnConfig.hover),
@@ -78,7 +86,8 @@ export const Field = ({ label, className, ...p }) => (
       className={cn(
         CONFIG.sizes.inputHeight,
         CONFIG.sizes.inputRadius,
-        'w-full border border-line2 bg-sub px-4 text-base text-fg outline-none placeholder:text-hint focus:border-accent',
+        CONFIG.ux?.inputFocusStyle || 'focus:border-accent focus:ring-1 focus:ring-accent/30',
+        'w-full border border-line2 bg-sub px-4 text-base text-fg outline-none placeholder:text-hint',
         className,
       )}
       {...p}
@@ -96,7 +105,8 @@ export function SearchField({ label, className, ...p }) {
           className={cn(
             CONFIG.sizes.inputHeight,
             CONFIG.sizes.inputRadius,
-            'w-full border border-line2 bg-sub pl-12 pr-4 text-fg outline-none placeholder:text-hint focus:border-accent',
+            CONFIG.ux?.inputFocusStyle || 'focus:border-accent focus:ring-1 focus:ring-accent/30',
+            'w-full border border-line2 bg-sub pl-12 pr-4 text-fg outline-none placeholder:text-hint',
             className,
           )}
           {...p}
@@ -107,14 +117,29 @@ export function SearchField({ label, className, ...p }) {
 }
 
 export function Stepper({ value, onChange, max = Infinity }) {
-  const btn = 'grid size-10 place-items-center rounded-lg'
+  const btn = cn(
+    'grid size-10 place-items-center rounded-lg select-none transition-all',
+    CONFIG.ux?.stepperActiveScale || 'active:scale-90',
+  )
   return (
     <div className="flex items-center gap-2">
-      <button aria-label="Kurangi" disabled={value <= 0} onClick={() => onChange(value - 1)} className={cn(btn, 'border border-line2 bg-chip text-fg')}>
+      <button
+        aria-label="Kurangi"
+        disabled={value <= 0}
+        onClick={() => onChange(value - 1)}
+        className={cn(btn, 'border border-line2 bg-chip text-fg hover:bg-line2 disabled:opacity-30 disabled:pointer-events-none')}
+      >
         <Minus className="size-5" />
       </button>
-      <span className="grid h-10 min-w-12 place-items-center rounded-lg border border-line bg-sub px-2 text-lg tabular-nums">{value}</span>
-      <button aria-label="Tambah" disabled={value >= max} onClick={() => onChange(value + 1)} className={cn(btn, 'bg-accent text-ink')}>
+      <span className="grid h-10 min-w-12 place-items-center rounded-lg border border-line bg-sub px-2 text-lg font-semibold tabular-nums">
+        {value}
+      </span>
+      <button
+        aria-label="Tambah"
+        disabled={value >= max}
+        onClick={() => onChange(value + 1)}
+        className={cn(btn, 'bg-accent text-ink hover:brightness-110 shadow-sm disabled:opacity-30 disabled:pointer-events-none')}
+      >
         <Plus className="size-5" />
       </button>
     </div>
@@ -181,7 +206,7 @@ export function Summary({ onNext, nextLabel, stacked }) {
   const labelNext = nextLabel || text.btnNext
 
   return (
-    <Card className={cn('sticky bottom-3 z-10 flex items-center justify-between gap-3 p-4 shadow-lg', stacked && 'lg:static lg:flex-1 lg:flex-col lg:items-stretch lg:justify-between lg:shadow-none')}>
+    <Card className={cn('sticky bottom-3 z-10 flex items-center justify-between gap-3 p-4 shadow-xl backdrop-blur-md bg-card/95 border border-line2/60', stacked && 'lg:static lg:flex-1 lg:flex-col lg:items-stretch lg:justify-between lg:shadow-none lg:bg-card lg:border-line2/30')}>
       <div>
         <p className="text-sm">{text.totalLabel} <span className="ml-1 text-xs text-muted">{units} {text.unitSuffix}</span></p>
         <p className="text-2xl font-bold tracking-wider text-price sm:text-3xl">{rp(total)}</p>

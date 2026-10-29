@@ -10,13 +10,13 @@ export default function Settings() {
   const [q, setQ] = useState('')
   const text = CONFIG.text.settings
   const show = 'tema tampilan dark light gelap terang'.includes(q.toLowerCase())
-  const seg = (on) => cn('grid size-12 place-items-center rounded-lg', on ? 'bg-accent text-ink' : 'text-muted')
+  const seg = (on) => cn('grid size-12 place-items-center rounded-lg transition-all active:scale-95 select-none', on ? 'bg-accent text-ink shadow-sm' : 'text-muted hover:text-fg hover:bg-chip/50')
 
   return (
     <Screen>
       <Header title={text.headerTitle} />
       <div className="flex items-end justify-between gap-4">
-        <Card className="flex-1 p-4 lg:max-w-md"><SearchField label={text.searchLabel} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Aji" /></Card>
+        <Card className="flex-1 p-4 lg:max-w-md"><SearchField label={text.searchLabel} value={q} onChange={(e) => setQ(e.target.value)} placeholder={text.searchPlaceholder || 'Cari pengaturan, tema...'} /></Card>
         <Btn variant="secondary" className="h-12 px-4 text-xs" onClick={() => { setTheme('dark'); notify(text.resetToast) }}>{text.defaultBtn}</Btn>
       </div>
       {show ? (

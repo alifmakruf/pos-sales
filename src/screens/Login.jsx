@@ -136,55 +136,57 @@ export default function Login() {
       </div>
 
       {/* Card Login dengan Efek Spotlight (berada di atas overlay z-20) */}
-      <div className="relative z-20">
-        {/* Pendaran cahaya spotlight di belakang login card */}
-        <div
-          className="pointer-events-none absolute -inset-4 -z-10 rounded-3xl transition-opacity duration-500"
-          style={{
-            background: `radial-gradient(ellipse at center, var(--accent) 0%, transparent 72%)`,
-            filter: `blur(${CONFIG.animations.spotlightBlur})`,
-            opacity: isSpotlightActive ? CONFIG.animations.spotlightGlowOpacity : 0,
-            transform: 'scale(1.06)',
-          }}
-          aria-hidden="true"
-        />
+      <div className={cn('relative z-20 flex w-full justify-center', CONFIG.sizes.loginCardAlign || 'lg:justify-center')}>
+        <div className={cn('relative w-full', CONFIG.sizes.loginCardMaxWidth || 'max-w-[460px]')}>
+          {/* Pendaran cahaya spotlight di belakang login card */}
+          <div
+            className="pointer-events-none absolute -inset-4 -z-10 rounded-3xl transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(ellipse at center, var(--accent) 0%, transparent 72%)`,
+              filter: `blur(${CONFIG.animations.spotlightBlur})`,
+              opacity: isSpotlightActive ? CONFIG.animations.spotlightGlowOpacity : 0,
+              transform: 'scale(1.06)',
+            }}
+            aria-hidden="true"
+          />
 
-        <Card
-          border="border border-line"
-          className={cn(
-            'p-6 transition-all duration-500 sm:p-8',
-            isSpotlightActive && (CONFIG.animations.spotlightCardBorder || 'border-accent/20'),
-          )}
-          style={{
-            boxShadow: isSpotlightActive ? CONFIG.animations.spotlightCardShadow : undefined,
-          }}
-          onFocus={() => setIsSpotlightActive(true)}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) {
-              setIsSpotlightActive(false)
-            }
-          }}
-        >
-          <form onSubmit={submit} className="flex flex-col gap-3">
-            <h1 className="mb-2 text-center text-3xl tracking-[0.12em] lg:text-left">{text.title}</h1>
-            <label className="text-sm text-muted">{text.usernameLabel}</label>
-            <IconInput icon={UserRound} value={id} onChange={(e) => setId(e.target.value)} placeholder={text.usernamePlaceholder} autoComplete="username" />
-            <label className="text-sm text-muted">{text.passwordLabel}</label>
-            <IconInput
-              icon={Lock} type={show ? 'text' : 'password'} value={pw} onChange={(e) => setPw(e.target.value)}
-              placeholder={text.passwordPlaceholder} autoComplete="new-password"
-              right={
-                <button type="button" aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'} onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted">
-                  {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                </button>
+          <Card
+            border="border border-line"
+            className={cn(
+              'p-6 transition-all duration-500 sm:p-8',
+              isSpotlightActive && (CONFIG.animations.spotlightCardBorder || 'border-accent/20'),
+            )}
+            style={{
+              boxShadow: isSpotlightActive ? CONFIG.animations.spotlightCardShadow : undefined,
+            }}
+            onFocus={() => setIsSpotlightActive(true)}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget)) {
+                setIsSpotlightActive(false)
               }
-            />
-            {err && <p role="alert" className="text-sm text-danger">{err}</p>}
-            <Btn type="submit" className={cn('mt-1 text-lg', CONFIG.sizes.largeBtnHeight)}>{text.submitBtn}</Btn>
-            <p className="text-center text-xs text-muted">{text.dividerText}</p>
-            <Btn type="button" variant="secondary" className={cn('bg-card text-lg', CONFIG.sizes.largeBtnHeight)} onClick={() => { login(); go('/home') }}>{text.googleBtn}</Btn>
-          </form>
-        </Card>
+            }}
+          >
+            <form onSubmit={submit} className="flex flex-col gap-3">
+              <h1 className="mb-2 text-center text-3xl tracking-[0.12em] lg:text-left">{text.title}</h1>
+              <label className="text-sm text-muted">{text.usernameLabel}</label>
+              <IconInput icon={UserRound} value={id} onChange={(e) => setId(e.target.value)} placeholder={text.usernamePlaceholder} autoComplete="username" />
+              <label className="text-sm text-muted">{text.passwordLabel}</label>
+              <IconInput
+                icon={Lock} type={show ? 'text' : 'password'} value={pw} onChange={(e) => setPw(e.target.value)}
+                placeholder={text.passwordPlaceholder} autoComplete="new-password"
+                right={
+                  <button type="button" aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'} onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+                    {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  </button>
+                }
+              />
+              {err && <p role="alert" className="text-sm text-danger">{err}</p>}
+              <Btn type="submit" className={cn('mt-1 text-lg', CONFIG.sizes.largeBtnHeight)}>{text.submitBtn}</Btn>
+              <p className="text-center text-xs text-muted">{text.dividerText}</p>
+              <Btn type="button" variant="secondary" className={cn('bg-card text-lg', CONFIG.sizes.largeBtnHeight)} onClick={() => { login(); go('/home') }}>{text.googleBtn}</Btn>
+            </form>
+          </Card>
+        </div>
       </div>
     </main>
   )

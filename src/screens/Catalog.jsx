@@ -145,8 +145,8 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
   }
 
   return (
-    <div className="fixed inset-0 z-30 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Scan Barcode">
-      <div className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl bg-card p-5 shadow-2xl">
+    <div className={cn('fixed inset-0 z-30 grid place-items-center p-4', CONFIG.ux?.modalBackdrop || 'bg-black/60 backdrop-blur-sm')} role="dialog" aria-modal="true" aria-label="Scan Barcode">
+      <div className="relative flex w-full max-w-md flex-col gap-4 rounded-2xl bg-card p-5 shadow-2xl animate-fade-in-up border border-line">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ScanBarcode className="size-6 text-accent" />
@@ -273,7 +273,7 @@ function ProductCard({ p, onOpen }) {
   const { unitsOfProduct } = useStore()
   const n = unitsOfProduct(p.id)
   return (
-    <Card className={cn('flex flex-col gap-2 p-2.5', CONFIG.sizes.catalogItemBg || 'bg-sub')}>
+    <Card className={cn('flex flex-col gap-2 p-2.5 border border-transparent', CONFIG.sizes.catalogItemBg || 'bg-sub', CONFIG.ux?.cardHoverEffect)}>
       <div className="relative">
         <ProductImage id={p.id} alt={p.name} className="aspect-square w-full rounded-xl" />
         {n > 0 && <Badge className="absolute right-0 top-0 rounded-none rounded-tr-xl">{n} Terpilih</Badge>}
@@ -285,7 +285,14 @@ function ProductCard({ p, onOpen }) {
       <h3 className="font-semibold leading-tight">{p.name}</h3>
       <div className="mt-auto flex items-end justify-between">
         <div className="text-[11px] text-muted">Mulai Dari<p className="text-sm font-semibold text-price">{rp(startPrice(p))}</p></div>
-        <button aria-label={n ? `Ubah ${p.name}` : `Tambah ${p.name}`} onClick={() => onOpen(p.id)} className={cn('grid size-10 place-items-center rounded-lg', n ? 'bg-accent text-ink' : 'border border-line2 bg-chip')}>
+        <button
+          aria-label={n ? `Ubah ${p.name}` : `Tambah ${p.name}`}
+          onClick={() => onOpen(p.id)}
+          className={cn(
+            'grid size-10 place-items-center rounded-lg select-none transition-all active:scale-90',
+            n ? 'bg-accent text-ink shadow-sm' : 'border border-line2 bg-chip hover:bg-line2',
+          )}
+        >
           {n ? <Pencil className="size-5" /> : <Plus className="size-5" />}
         </button>
       </div>
