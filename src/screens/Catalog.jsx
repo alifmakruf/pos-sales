@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Barcode, ImageUp, Pencil, Plus, ScanBarcode, Search, Store, Warehouse, X } from 'lucide-react'
+import { ArrowLeft, Barcode, ImageUp, Pencil, Plus, ScanBarcode, Search, Store, Warehouse, X, Zap } from 'lucide-react'
 import { Badge, Btn, Card, Chip, Empty, Header, ProductImage, Screen, SearchField, Stepper, Summary } from '../ui.jsx'
 import { useStore } from '../store.jsx'
 import { PRODUCTS, startPrice } from '../data'
@@ -14,8 +14,11 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
   const [manualCode, setManualCode] = useState('')
   const [cameraError, setCameraError] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)      // Status senter (flashlight) kamera
+  const [torchSupported, setTorchSupported] = useState(false) // Apakah perangkat mendukung senter
   const scannerRef = useRef(null)
   const fileInputRef = useRef(null)
+  const videoTrackRef = useRef(null)                 // Referensi video track untuk kontrol torch
 
   useEffect(() => {
     if (!open) return
@@ -65,7 +68,17 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
             () => {} // Abaikan per-frame decode error saat barcode belum di depan kamera
           )
           .then(() => {
-            if (active) setIsScanning(true)
+            if (!active) return
+            setIsScanning(true)
+            // Ambil video track untuk kontrol torch/flashlight
+            const video = document.querySelector('#barcode-scanner-view video')
+            const track = video?.srcObject?.getVideoTracks?.()?.[0]
+            if (track) {
+              videoTrackRef.current = track
+              const caps = track.getCapabilities?.()
+              // Cek dukungan torch di perangkat
+              if (caps?.torch) setTorchSupported(true)
+            }
           })
           .catch(() => {
             if (active) setCameraError(true)
@@ -78,6 +91,9 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
 
     return () => {
       active = false
+      videoTrackRef.current = null
+      setTorchOn(false)
+      setTorchSupported(false)
       if (scannerRef.current?.isScanning) {
         scannerRef.current.stop().catch(() => {}).finally(() => {
           scannerRef.current?.clear()
@@ -89,6 +105,16 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
   }, [open, onScan])
 
   if (!open) return null
+
+  // Toggle senter/flashlight kamera belakang
+  const toggleTorch = () => {
+    const track = videoTrackRef.current
+    if (!track) return
+    const next = !torchOn
+    track.applyConstraints({ advanced: [{ torch: next }] })
+      .then(() => setTorchOn(next))
+      .catch(() => {}) // Abaikan jika perangkat tidak mendukung
+  }
 
   // Pindai dari file gambar
   const handleFileUpload = (e) => {
@@ -129,9 +155,23 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
               <p className="text-[11px] text-muted">Arahkan kamera ke barcode produk</p>
             </div>
           </div>
-          <button aria-label="Tutup pemindai" onClick={onClose} className="rounded-lg p-2 text-muted hover:bg-chip hover:text-fg">
-            <X className="size-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Tombol senter — hanya tampil jika kamera aktif dan perangkat mendukung */}
+            {torchSupported && (
+              <button
+                aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'}
+                onClick={toggleTorch}
+                className={`rounded-lg p-2 transition-colors ${
+                  torchOn ? 'bg-accent/20 text-accent' : 'text-muted hover:bg-chip hover:text-fg'
+                }`}
+              >
+                <Zap className="size-5" fill={torchOn ? 'currentColor' : 'none'} />
+              </button>
+            )}
+            <button aria-label="Tutup pemindai" onClick={onClose} className="rounded-lg p-2 text-muted hover:bg-chip hover:text-fg">
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
 
         {/* Viewfinder kamera real-time dengan Html5Qrcode engine */}
