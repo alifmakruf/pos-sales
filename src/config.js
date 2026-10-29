@@ -152,6 +152,7 @@ export const CONFIG = {
     // Efek Barcode Scanner pada Halaman Catalog
     laserColor: '#ef4444',            // Warna garis laser pemindai barcode
     laserSpeed: '2s',                 // Kecepatan ayunan naik-turun garis laser scanner
+    scannerFps: 10,                   // Frame per detik pemindaian kamera real-time (efisien & hemat baterai)
   },
 
   // ----------------------------------------------------------------------------

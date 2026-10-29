@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Barcode, Pencil, Plus, ScanBarcode, Search, Store, Warehouse, X } from 'lucide-react'
+import { ArrowLeft, Barcode, ImageUp, Pencil, Plus, ScanBarcode, Search, Store, Warehouse, X } from 'lucide-react'
 import { Badge, Btn, Card, Chip, Empty, Header, ProductImage, Screen, SearchField, Stepper, Summary } from '../ui.jsx'
 import { useStore } from '../store.jsx'
 import { PRODUCTS, startPrice } from '../data'
@@ -9,45 +9,100 @@ import { useProceed } from './NewOrder.jsx'
 
 const CATS = ['Semua', 'Meja', 'Lemari', 'Kasur', 'Kursi']
 
-// Modal Pemindai Barcode (Kamera / Laser Scan & Uji Cepat)
+// Modal Pemindai Barcode Real-Time Menggunakan Lazy Loaded Engine Html5-Qrcode
 function BarcodeScannerModal({ open, onClose, onScan }) {
   const [manualCode, setManualCode] = useState('')
   const [cameraError, setCameraError] = useState(false)
-  const videoRef = useRef(null)
-  const streamRef = useRef(null)
+  const [isScanning, setIsScanning] = useState(false)
+  const scannerRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
     let active = true
 
-    if (navigator.mediaDevices?.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: 'environment' } })
-        .then((stream) => {
-          if (!active) {
-            stream.getTracks().forEach((t) => t.stop())
-            return
-          }
-          streamRef.current = stream
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream
-          }
+    // Lazy load library html5-qrcode hanya saat modal dibuka (mencegah error 504 outdated optimize dep)
+    import('html5-qrcode')
+      .then(({ Html5Qrcode, Html5QrcodeSupportedFormats }) => {
+        if (!active) return
+
+        const formatsToSupport = [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.ITF,
+        ]
+
+        const scanner = new Html5Qrcode('barcode-scanner-view', {
+          formatsToSupport,
+          verbose: false,
         })
-        .catch(() => setCameraError(true))
-    } else {
-      setCameraError(true)
-    }
+        scannerRef.current = scanner
+
+        const config = {
+          fps: CONFIG.animations.scannerFps || 10,
+          qrbox: { width: 260, height: 140 }, // Rasio horizontal optimal untuk barcode garis 1D
+          aspectRatio: 1.333333,
+        }
+
+        scanner
+          .start(
+            { facingMode: 'environment' },
+            config,
+            (decodedText) => {
+              if (!active) return
+              scanner
+                .stop()
+                .catch(() => {})
+                .finally(() => {
+                  onScan(decodedText)
+                })
+            },
+            () => {} // Abaikan per-frame decode error saat barcode belum di depan kamera
+          )
+          .then(() => {
+            if (active) setIsScanning(true)
+          })
+          .catch(() => {
+            if (active) setCameraError(true)
+          })
+      })
+      .catch((err) => {
+        console.error('Gagal memuat modul scanner:', err)
+        if (active) setCameraError(true)
+      })
 
     return () => {
       active = false
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop())
-        streamRef.current = null
+      if (scannerRef.current?.isScanning) {
+        scannerRef.current.stop().catch(() => {}).finally(() => {
+          scannerRef.current?.clear()
+        })
+      } else {
+        scannerRef.current?.clear()
       }
     }
-  }, [open])
+  }, [open, onScan])
 
   if (!open) return null
+
+  // Pindai dari file gambar
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !scannerRef.current) return
+    scannerRef.current
+      .scanFile(file, true)
+      .then((decodedText) => {
+        onScan(decodedText)
+      })
+      .catch(() => {
+        alert('Barcode tidak terbaca pada gambar ini. Pastikan gambar jelas dan terang.')
+      })
+  }
 
   const samples = [
     { code: '2461427', label: 'Meja Belajar (Lipat Hitam)' },
@@ -69,18 +124,21 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ScanBarcode className="size-6 text-accent" />
-            <h3 className="text-xl font-bold">Pindai Barcode</h3>
+            <div>
+              <h3 className="text-xl font-bold leading-tight">Pindai Barcode</h3>
+              <p className="text-[11px] text-muted">Arahkan kamera ke barcode produk</p>
+            </div>
           </div>
           <button aria-label="Tutup pemindai" onClick={onClose} className="rounded-lg p-2 text-muted hover:bg-chip hover:text-fg">
             <X className="size-5" />
           </button>
         </div>
 
-        {/* Viewfinder kamera & laser scan */}
-        <div className="relative flex h-52 w-full items-center justify-center overflow-hidden rounded-xl border border-line bg-black">
-          <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+        {/* Viewfinder kamera real-time dengan Html5Qrcode engine */}
+        <div className="relative h-56 w-full overflow-hidden rounded-xl bg-black">
+          <div id="barcode-scanner-view" className="h-full w-full" />
 
-          {/* Bingkai bidik */}
+          {/* Bingkai bidik scanner */}
           <div className="pointer-events-none absolute inset-6 flex items-center justify-center">
             <div className="absolute inset-0 rounded-lg border-2 border-dashed border-accent/40" />
             <div className="absolute left-0 top-0 size-5 border-l-4 border-t-4 border-accent" />
@@ -88,22 +146,55 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
             <div className="absolute bottom-0 left-0 size-5 border-b-4 border-l-4 border-accent" />
             <div className="absolute bottom-0 right-0 size-5 border-b-4 border-r-4 border-accent" />
 
-            {/* Garis laser animasi */}
-            <div
-              className="scan-laser-line absolute left-0 right-0 h-0.5 shadow-[0_0_8px_#ef4444]"
-              style={{
-                backgroundColor: CONFIG.animations.laserColor || '#ef4444',
-                '--laser-speed': CONFIG.animations.laserSpeed || '2s',
-              }}
-            />
+            {/* Garis laser animasi merah */}
+            {isScanning && (
+              <div
+                className="scan-laser-line absolute left-0 right-0 h-0.5 shadow-[0_0_8px_#ef4444]"
+                style={{
+                  backgroundColor: CONFIG.animations.laserColor || '#ef4444',
+                  '--laser-speed': CONFIG.animations.laserSpeed || '2s',
+                }}
+              />
+            )}
           </div>
 
-          <p className="pointer-events-none absolute bottom-2 rounded-full bg-black/75 px-3 py-1 text-xs text-muted">
-            {cameraError ? 'Arahkan scanner / gunakan kode sampel di bawah' : 'Arahkan kamera ke barcode'}
-          </p>
+          {cameraError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/85 p-4 text-center">
+              <ScanBarcode className="size-10 text-muted" />
+              <p className="text-xs text-muted">Kamera tidak dapat diakses atau izin ditolak.</p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-1 flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-ink"
+              >
+                <ImageUp className="size-4" />
+                Unggah Foto Barcode
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Input barcode manual */}
+        {/* Baris opsi: Upload foto barcode & input manual */}
+        <div className="flex items-center justify-between gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 rounded-lg bg-sub px-3 py-2 text-xs font-medium text-fg hover:bg-chip transition-colors"
+          >
+            <ImageUp className="size-4 text-accent" />
+            Unggah Foto Barcode
+          </button>
+          <span className="text-[11px] text-muted">atau ketik di bawah</span>
+        </div>
+
+        {/* Form input barcode manual */}
         <form onSubmit={handleManualSubmit} className="flex gap-2">
           <input
             type="text"
@@ -115,16 +206,16 @@ function BarcodeScannerModal({ open, onClose, onScan }) {
           <Btn type="submit" className="h-11 px-4 text-sm">Pindai</Btn>
         </form>
 
-        {/* Sampel barcode untuk pengujian cepat */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted">Uji cepat barcode:</span>
+        {/* Sampel barcode untuk pengujian instan */}
+        <div className="flex flex-col gap-1.5 border-t border-line pt-2">
+          <span className="text-[11px] text-muted">Uji cepat barcode:</span>
           <div className="flex flex-wrap gap-1.5">
             {samples.map((s) => (
               <button
                 key={s.code}
                 type="button"
                 onClick={() => onScan(s.code)}
-                className="flex items-center gap-1.5 rounded-lg border border-line bg-sub px-2.5 py-1 text-xs text-fg hover:border-accent hover:bg-chip"
+                className="flex items-center gap-1.5 rounded-lg bg-sub px-2.5 py-1 text-xs text-fg hover:bg-chip hover:text-accent transition-colors"
               >
                 <Barcode className="size-3.5 text-muted" />
                 <span className="font-mono font-semibold">{s.code}</span>

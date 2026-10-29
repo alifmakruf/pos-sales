@@ -268,3 +268,17 @@ button:disabled {
   animation: scan-laser var(--laser-speed, 2s) ease-in-out infinite;
   will-change: transform;
 }
+
+/* Container & video Html5Qrcode Scanner */
+#barcode-scanner-view {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+#barcode-scanner-view video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0.75rem !important;
+}
